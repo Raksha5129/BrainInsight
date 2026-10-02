@@ -1,61 +1,222 @@
-# BrainInsight — VS Code quick start
+ # 🧠 BrainInsight
 
-BrainInsight is a React research dashboard for exploring a five-class brain MRI classifier. This build includes the interface, notebook evaluation results, educational category notes, and a local image preview. **It does not run MRI inference** because the `.keras` model checkpoint and an inference API were not included.
+### AI-Assisted Multiclass Brain MRI Analysis using EfficientNetB0
 
-## Requirements
+BrainInsight is an AI-assisted brain MRI analysis system designed to classify MRI images into five neurological categories using a deep learning model based on **EfficientNetB0**.
 
-- **Visual Studio Code**
-- **Node.js 22 LTS** (22.12 or newer recommended; Node 20.19 or newer also works with Vite 7)
-- **pnpm 10.18.0**
+The project combines a modern React interface with a local Flask inference service, allowing users to upload an MRI scan, receive a model prediction, view class probabilities, and generate a downloadable scan report.
 
-Install the pinned package manager if necessary:
+> **Research / Educational Use Only:** BrainInsight is a student research project and is not intended to provide medical diagnosis, treatment recommendations, or replace evaluation by qualified healthcare professionals.
 
-```bash
-npm install --global pnpm@10.18.0
+---
+
+## ✨ Features
+
+* 🧠 **Multiclass MRI Classification**
+* 🤖 EfficientNetB0-based deep learning model
+* 📊 Probability distribution across all five classes
+* 🖼️ MRI image preview
+* ⚡ Local model inference using Flask
+* 💻 Modern React + TypeScript interface
+* 📄 Downloadable individual scan reports
+* 📈 Model performance and insights dashboard
+* 📚 Disease information library
+* 🔒 Model runs locally rather than exposing the model through the frontend
+* 📱 Responsive dark medical/research interface
+
+---
+
+## 🎯 Supported Classes
+
+BrainInsight currently predicts five classes:
+
+| Class              | Description                                                     |
+| ------------------ | --------------------------------------------------------------- |
+| Alzheimer          | MRI patterns associated with Alzheimer's classification dataset |
+| Brain Tumor        | Brain MRI tumor classification                                  |
+| Multiple Sclerosis | MRI classification associated with MS                           |
+| Normal             | Normal/non-disease MRI images                                   |
+| Stroke             | Stroke-related MRI classification                               |
+
+---
+
+## 🧠 Model
+
+BrainInsight uses an **ImageNet-pretrained EfficientNetB0** backbone.
+
+### Architecture
+
+```text
+Input MRI
+   │
+   ▼
+224 × 224 × 3
+   │
+   ▼
+EfficientNetB0
+(ImageNet pretrained)
+   │
+   ▼
+Global Average Pooling
+   │
+   ▼
+Batch Normalization
+   │
+   ▼
+Dropout (0.4)
+   │
+   ▼
+Dense Layer
+   │
+   ▼
+5-Class Softmax
+   │
+   ▼
+Prediction + Probabilities
 ```
 
-Alternatively, if Corepack is available with your Node.js installation:
+The final model is stored as:
 
-```bash
-corepack enable
-corepack prepare pnpm@10.18.0 --activate
+```text
+backend/model/BrainInsight_Final_v2.keras
 ```
 
-## Open and run
+Metadata is stored as:
 
-1. Download and extract the BrainInsight project ZIP.
-2. In VS Code, choose **File → Open Folder…** and select the extracted folder that contains `package.json`.
-3. Open **Terminal → New Terminal** and confirm the tools:
-
-   ```bash
-   node --version
-   pnpm --version
-   ```
-
-4. Install dependencies, then start the static development site:
-
-   ```bash
-   pnpm install --frozen-lockfile
-   pnpm dev:static
-   ```
-
-5. Open **http://localhost:3000** in your browser. Keep the terminal running while you use the site; press **Ctrl+C** to stop it.
-
-No `.env` file, database, or backend service is required for this UI preview. The development command is cross-platform and uses port `3000` by default; if `PORT` is set in your environment, Vite uses that port instead.
-
-## Useful commands
-
-```bash
-pnpm check          # TypeScript checks
-pnpm build:static   # Create a production static build in dist/public
+```text
+backend/model/BrainInsight_v2_metadata.json
 ```
 
-## What the MRI controls do in this build
+---
 
-- The uploader accepts JPG/JPEG, PNG, BMP, or WEBP images up to 20 MB.
-- A chosen file is previewed locally in the browser; it is **not uploaded** by this app.
-- DICOM files are not supported by the notebook’s 224 × 224 RGB image pipeline.
-- The “Check model” control confirms that inference weights are unavailable. **No per-scan prediction or confidence is generated.**
-- The 98.48% accuracy and other metrics shown on the dashboard are from the notebook’s held-out test set; they are not a result for a new image or clinical validation.
+## 📊 Model Performance
 
-To add real inference later, provide the trained `BrainInsight_Final_v2.keras` checkpoint and implement a secure inference service that performs the notebook’s preprocessing and returns the five-class probabilities. Keep patient scans and model files out of the public frontend asset folder.
+The final model was evaluated on a held-out test set of **1,841 MRI images**.
+
+| Metric            |     Result |
+| ----------------- | ---------: |
+| Test Accuracy     | **98.48%** |
+| Test Loss         | **0.0440** |
+| Macro F1-Score    | **98.00%** |
+| Weighted F1-Score | **98.48%** |
+| Test Images       |  **1,841** |
+
+### Dataset
+
+The final dataset contains **12,267 images**:
+
+| Class              |     Images |
+| ------------------ | ---------: |
+| Alzheimer          |      4,500 |
+| Brain Tumor        |      4,200 |
+| Multiple Sclerosis |      1,411 |
+| Normal             |      1,400 |
+| Stroke             |        756 |
+| **Total**          | **12,267** |
+
+The dataset was organized and processed before model training, followed by a stratified train/validation/test split.
+
+---
+
+## 🏗️ System Architecture
+
+```text
+                    ┌──────────────────────┐
+                    │      User / UI       │
+                    │   React + TypeScript │
+                    └──────────┬───────────┘
+                               │
+                               │ MRI Upload
+                               ▼
+                    ┌──────────────────────┐
+                    │   Flask Backend      │
+                    │   Local Inference    │
+                    └──────────┬───────────┘
+                               │
+                               ▼
+                    ┌──────────────────────┐
+                    │   EfficientNetB0     │
+                    │  BrainInsight Model  │
+                    └──────────┬───────────┘
+                               │
+                               ▼
+                 ┌─────────────────────────────┐
+                 │ Prediction + Class          │
+                 │ Probabilities               │
+                 └─────────────┬───────────────┘
+                               │
+                               ▼
+                    ┌──────────────────────┐
+                    │     React UI         │
+                    │ Results + Report     │
+                    └──────────────────────┘
+```
+
+---
+
+## 🛠️ Technology Stack
+
+### Frontend
+
+* React
+* TypeScript
+* Vite
+* Tailwind CSS
+* Framer Motion
+* Lucide Icons
+* Recharts
+* jsPDF
+
+### Backend
+
+* Python
+* Flask
+* TensorFlow
+* Keras
+* NumPy
+* Pillow
+
+### Machine Learning
+
+* EfficientNetB0
+* Transfer Learning
+* ImageNet pretrained weights
+* Stratified dataset splitting
+* Class-weighted training
+* Softmax multiclass classification
+
+---
+
+## 📁 Project Structure
+
+```text
+BrainInsight/
+│
+├── backend/
+│   ├── model/
+│   │   ├── BrainInsight_Final_v2.keras
+│   │   └── BrainInsight_v2_metadata.json
+│   │
+│   ├── app.py
+│   ├── requirements.txt
+│   └── run_windows.bat
+│
+├── client/
+│   └── src/
+│       ├── components/
+│       │   └── brainInsight/
+│       │       ├── Brand.tsx
+│       │       ├── ScanWorkspace.tsx
+│       │       ├── DiseaseLibrary.tsx
+│       │       └── ModelInsights.tsx
+│       │
+│       └── lib/
+│           ├── brainInsightData.ts
+│           └── createPdfReport.ts
+│
+├── server/
+├── shared/
+├── package.json
+├── package-lock.json
+├──
+```
