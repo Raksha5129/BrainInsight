@@ -1,0 +1,29 @@
+{
+    "model": "BrainInsight_Final_v2.keras",
+    "architecture": "EfficientNetB0",
+    "image_size": [
+        224,
+        224
+    ],
+    "class_names": [
+        "alzheimer",
+        "multiple_sclerosis",
+        "normal",
+        "stroke",
+        "tumor"
+    ],
+    "label_to_id": {
+        "alzheimer": 0,
+        "multiple_sclerosis": 1,
+        "normal": 2,
+        "stroke": 3,
+        "tumor": 4
+    },
+    "test_accuracy": 0.9847908616065979,
+    "test_loss": 0.04398059472441673,
+    "dataset_split": {
+        "train": 8586,
+        "validation": 1840,
+        "test": 1841
+    }
+}
