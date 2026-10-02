@@ -44,50 +44,26 @@ BrainInsight currently predicts five classes:
 
 BrainInsight uses an **ImageNet-pretrained EfficientNetB0** backbone.
 
-### Architecture
+## 🏗️ System Architecture
 
-```text
-Input MRI
-   │
-   ▼
-224 × 224 × 3
-   │
-   ▼
-EfficientNetB0
-(ImageNet pretrained)
-   │
-   ▼
-Global Average Pooling
-   │
-   ▼
-Batch Normalization
-   │
-   ▼
-Dropout (0.4)
-   │
-   ▼
-Dense Layer
-   │
-   ▼
-5-Class Softmax
-   │
-   ▼
-Prediction + Probabilities
-```
+BrainInsight uses a local client–server architecture where the React application communicates with a Flask inference API that loads the trained EfficientNetB0 model.
 
-The final model is stored as:
+```mermaid
+flowchart LR
+    A["👤 User"] --> B["🖥️ React + TypeScript UI"]
 
-```text
-backend/model/BrainInsight_Final_v2.keras
-```
+    B -->|"Upload MRI"| C["⚙️ Flask Inference API"]
 
-Metadata is stored as:
+    C --> D["🖼️ Image Preprocessing"]
+    D --> E["🧠 EfficientNetB0"]
+    E --> F["📊 Softmax Prediction"]
 
-```text
-backend/model/BrainInsight_v2_metadata.json
-```
+    F -->|"Prediction + Probabilities"| C
+    C --> B
 
----
+    B --> G["📄 PDF Scan Report"]
+
+    H["📦 BrainInsight_Final_v2.keras"] --> E
 
 ## 📊 Model Performance
 
